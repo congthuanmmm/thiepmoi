@@ -58,7 +58,6 @@ const CardCanvas = forwardRef<CardCanvasRef, CardCanvasProps>(({ data }, ref) =>
     // Adjusted Card dimensions for the V2 template
     const cardWidth = 800;
     const cardHeight = 960;
-    const cardX = 140; // (1080 - 800) / 2
     const cardY = 60;
 
     return (
