@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Stage, Layer, Image as KonvaImage, Text, Rect, Group, Circle, Line } from 'react-konva';
 import useImage from 'use-image';
 import { CARD_CONFIG } from '@/lib/card-config';
@@ -8,51 +8,46 @@ import { InvitationData } from '@/types/invitation';
 
 interface CardCanvasProps {
     data: InvitationData;
+    downloadTrigger?: number;
 }
 
-export interface CardCanvasRef {
-    download: () => void;
-}
-
-const CardCanvas = forwardRef<CardCanvasRef, CardCanvasProps>(({ data }, ref) => {
+const CardCanvas = ({ data, downloadTrigger }: CardCanvasProps) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stageRef = useRef<any>(null);
     const [banner] = useImage('/banner.jpg');
     const [guestImg] = useImage(data.guestImage || '', 'anonymous');
     const [qrCode] = useImage('/qr.png');
 
-    // Custom fonts are loaded via CSS, Konva can use them if they are loaded by browser
-    useImperativeHandle(ref, () => ({
-        download: () => {
-            if (!stageRef.current) return;
+    useEffect(() => {
+        if (!downloadTrigger || downloadTrigger === 0) return;
+        if (!stageRef.current) return;
 
-            try {
-                // Optimization: Use pixelRatio: 1 for 1080x1920 (already high res)
-                const uri = stageRef.current.toDataURL({
-                    pixelRatio: 1,
-                    mimeType: 'image/png'
-                });
+        try {
+            // Optimization: Use pixelRatio: 1 for 1080x1920 (already high res)
+            const uri = stageRef.current.toDataURL({
+                pixelRatio: 1,
+                mimeType: 'image/png'
+            });
 
-                if (!uri || uri === 'data:,') {
-                    throw new Error("Canvas data is empty");
-                }
-
-                const link = document.createElement('a');
-                link.download = `ThiepMoi-${(data.guestName || 'AI-Event').replace(/\s+/g, '-')}.png`;
-                link.href = uri;
-                document.body.appendChild(link);
-                link.click();
-
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                }, 200);
-            } catch (err) {
-                console.error("Download error:", err);
-                alert("Lỗi tải ảnh. Nếu bạn đang dùng iPhone/Zalo, hãy nhấn giữ vào ảnh thiệp để lưu hoặc chụp màn hình nhé!");
+            if (!uri || uri === 'data:,') {
+                throw new Error("Canvas data is empty");
             }
+
+            const link = document.createElement('a');
+            link.download = `ThiepMoi-${(data.guestName || 'AI-Event').replace(/\s+/g, '-')}.png`;
+            link.href = uri;
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(link);
+            }, 200);
+        } catch (err) {
+            console.error("Download error:", err);
+            alert("Lỗi tải ảnh. Nếu bạn đang dùng iPhone/Zalo, hãy nhấn giữ vào ảnh thiệp để lưu hoặc chụp màn hình nhé!");
         }
-    }));
+    }, [downloadTrigger, data.guestName]);
 
     const getCrop = (image: HTMLImageElement, containerWidth: number, containerHeight: number) => {
         const imageRatio = image.width / image.height;
@@ -285,8 +280,7 @@ const CardCanvas = forwardRef<CardCanvasRef, CardCanvasProps>(({ data }, ref) =>
                 </Group>
             </Layer>
         </Stage>
-    );
-});
+};
 
 CardCanvas.displayName = 'CardCanvas';
 

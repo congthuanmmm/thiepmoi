@@ -29,7 +29,7 @@ export default function Home() {
   });
 
   const [mounted, setMounted] = useState(false);
-  const canvasRef = useRef<CardCanvasRef>(null);
+  const [downloadTrigger, setDownloadTrigger] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -40,7 +40,7 @@ export default function Home() {
   };
 
   const handleDownload = () => {
-    canvasRef.current?.download();
+    setDownloadTrigger(Date.now());
   };
 
   return (
@@ -87,7 +87,7 @@ export default function Home() {
               {/* Decorative Frame */}
               <div className="absolute -inset-1 bg-gradient-to-b from-[#00D1FF]/40 to-transparent rounded-3xl blur-md opacity-70"></div>
               <div className="relative border shadow-2xl rounded-2xl overflow-hidden border-[#1A2E4C] bg-[#040B16] w-full">
-                {mounted && <CardCanvas data={data} ref={canvasRef} />}
+                {mounted && <CardCanvas data={data} downloadTrigger={downloadTrigger} />}
               </div>
               <p className="text-center text-[#8BA6C4] text-sm mt-6 flex items-center justify-center gap-2">
                 Preview thiệp mời theo thời gian thực
