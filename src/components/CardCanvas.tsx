@@ -280,6 +280,7 @@ const CardCanvas = ({ data, downloadTrigger }: CardCanvasProps) => {
                 </Group>
             </Layer>
         </Stage>
+    );
 };
 
 CardCanvas.displayName = 'CardCanvas';
