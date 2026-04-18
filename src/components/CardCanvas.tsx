@@ -24,14 +24,26 @@ const CardCanvas = forwardRef<CardCanvasRef, CardCanvasProps>(({ data }, ref) =>
     // Custom fonts are loaded via CSS, Konva can use them if they are loaded by browser
     useImperativeHandle(ref, () => ({
         download: () => {
-            if (stageRef.current) {
-                const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+            if (!stageRef.current) return;
+
+            try {
+                // Ensure the stage is drawn completely before capture
+                const uri = stageRef.current.toDataURL({
+                    pixelRatio: 2,
+                    mimeType: 'image/png',
+                    quality: 1
+                });
+
                 const link = document.createElement('a');
-                link.download = `ThiepMoi-${data.guestName || 'AI-Event'}.png`;
+                link.download = `ThiepMoi-${(data.guestName || 'AI-Event').replace(/\s+/g, '-')}.png`;
                 link.href = uri;
+                link.setAttribute('target', '_blank');
                 document.body.appendChild(link);
                 link.click();
-                document.body.removeChild(link);
+                setTimeout(() => document.body.removeChild(link), 100);
+            } catch (err) {
+                console.error("Download failed:", err);
+                alert("Không thể tải ảnh. Vui lòng thử lại hoặc chụp màn hình nếu bạn đang dùng trình duyệt in-app (Facebook/Zalo).");
             }
         }
     }));
