@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { Download } from "lucide-react";
 import UploadForm from "@/components/UploadForm";
 import { InvitationData } from "@/types/invitation";
-import { CardCanvasRef } from "@/components/CardCanvas";
 
 // Dynamically import Konva components because they need the window object
 const CardCanvas = dynamic(() => import("@/components/CardCanvas"), {
