@@ -17,9 +17,9 @@ export interface CardCanvasRef {
 const CardCanvas = forwardRef<CardCanvasRef, CardCanvasProps>(({ data }, ref) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stageRef = useRef<any>(null);
-    const [banner] = useImage('/banner.jpg', 'anonymous');
+    const [banner] = useImage('/banner.jpg');
     const [guestImg] = useImage(data.guestImage || '', 'anonymous');
-    const [qrCode] = useImage('/qr.png', 'anonymous');
+    const [qrCode] = useImage('/qr.png');
 
     // Custom fonts are loaded via CSS, Konva can use them if they are loaded by browser
     useImperativeHandle(ref, () => ({
@@ -27,23 +27,29 @@ const CardCanvas = forwardRef<CardCanvasRef, CardCanvasProps>(({ data }, ref) =>
             if (!stageRef.current) return;
 
             try {
-                // Ensure the stage is drawn completely before capture
+                // Optimization: Use pixelRatio: 1 for 1080x1920 (already high res)
                 const uri = stageRef.current.toDataURL({
-                    pixelRatio: 2,
-                    mimeType: 'image/png',
-                    quality: 1
+                    pixelRatio: 1,
+                    mimeType: 'image/png'
                 });
+
+                if (!uri || uri === 'data:,') {
+                    throw new Error("Canvas data is empty");
+                }
 
                 const link = document.createElement('a');
                 link.download = `ThiepMoi-${(data.guestName || 'AI-Event').replace(/\s+/g, '-')}.png`;
                 link.href = uri;
-                link.setAttribute('target', '_blank');
                 document.body.appendChild(link);
                 link.click();
-                setTimeout(() => document.body.removeChild(link), 100);
+
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                }, 200);
             } catch (err) {
-                console.error("Download failed:", err);
-                alert("Không thể tải ảnh. Vui lòng thử lại hoặc chụp màn hình nếu bạn đang dùng trình duyệt in-app (Facebook/Zalo).");
+                console.error("Download error:", err);
+                alert("Lỗi tải ảnh. Nếu bạn đang dùng iPhone/Zalo, hãy nhấn giữ vào ảnh thiệp để lưu hoặc chụp màn hình nhé!");
             }
         }
     }));
